@@ -1,36 +1,7 @@
 import appConfig from "../config.json";
+import React from "react";
 import { Box, Button, Text, TextField, Image } from "@skynexui/components";
-
-function GlobalStyle() {
-  return (
-    <style global jsx>{`
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        list-style: none;
-      }
-      body {
-        font-family: "Open Sans", sans-serif;
-      }
-      /* App fit Height */
-      html,
-      body,
-      #__next {
-        min-height: 100vh;
-        display: flex;
-        flex: 1;
-      }
-      #__next {
-        flex: 1;
-      }
-      #__next > * {
-        flex: 1;
-      }
-      /* ./App fit Height */
-    `}</style>
-  );
-}
+import { useRouter } from "next/router";
 
 function Titulo(props) {
   const Tag = props.tag || "h1";
@@ -49,17 +20,18 @@ function Titulo(props) {
 }
 
 export default function PaginaInicial() {
-  const username = "lucasdorador";
+  const minimoLetrasGitHub = 2;
+  const [username, setUserName] = React.useState("lucasdorador");
+  const roteamento = useRouter();
 
   return (
     <>
-      <GlobalStyle />
       <Box
         styleSheet={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: appConfig.theme.colors.primary[500],
+          backgroundColor: appConfig.theme.colors.primary["500"],
           backgroundImage:
             "url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)",
           backgroundRepeat: "no-repeat",
@@ -88,6 +60,10 @@ export default function PaginaInicial() {
           {/* Formulário */}
           <Box
             as="form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              roteamento.push("/chat");
+            }}
             styleSheet={{
               display: "flex",
               flexDirection: "column",
@@ -111,6 +87,10 @@ export default function PaginaInicial() {
 
             <TextField
               fullWidth
+              value={username}
+              onChange={(event) => {
+                setUserName(event.target.value);
+              }}
               textFieldColors={{
                 neutral: {
                   textColor: appConfig.theme.colors.neutrals[200],
@@ -155,7 +135,11 @@ export default function PaginaInicial() {
                 borderRadius: "50%",
                 marginBottom: "16px",
               }}
-              src={`https://github.com/${username}.png`}
+              src={
+                username.length > minimoLetrasGitHub
+                  ? `https://github.com/${username}.png`
+                  : ""
+              }
             />
             <Text
               variant="body4"
@@ -166,7 +150,7 @@ export default function PaginaInicial() {
                 borderRadius: "1000px",
               }}
             >
-              {username}
+              {username.length > minimoLetrasGitHub ? username : ""}
             </Text>
           </Box>
           {/* Photo Area */}
