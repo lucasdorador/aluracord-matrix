@@ -31,9 +31,9 @@ export default function PaginaInicial() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: appConfig.theme.colors.primary["500"],
+          backgroundColor: appConfig.theme.colors.primary["900"],
           backgroundImage:
-            "url(https://virtualbackgrounds.site/wp-content/uploads/2020/08/the-matrix-digital-rain.jpg)",
+            "url(https://live.staticflickr.com/65535/51844720015_91dadafd38_k.jpg)",
           backgroundRepeat: "no-repeat",
           backgroundSize: "cover",
           backgroundBlendMode: "multiply",
@@ -138,7 +138,7 @@ export default function PaginaInicial() {
               src={
                 username.length > minimoLetrasGitHub
                   ? `https://github.com/${username}.png`
-                  : ""
+                  : "https://live.staticflickr.com/65535/51844731245_8d1719bb1b_w.jpg"
               }
             />
             <Text
@@ -150,7 +150,9 @@ export default function PaginaInicial() {
                 borderRadius: "1000px",
               }}
             >
-              {username.length > minimoLetrasGitHub ? username : ""}
+              {username.length > minimoLetrasGitHub
+                ? username
+                : "Selecione um usuário"}
             </Text>
           </Box>
           {/* Photo Area */}
