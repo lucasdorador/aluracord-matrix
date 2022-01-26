@@ -220,7 +220,8 @@ function MessageList(props) {
               <Button
                 size="xs"
                 variant="tertiary"
-                iconName="arrowRight"
+                colorVariant="negative"
+                iconName="WindowClose"
                 onClick={() => {
                   props.deletarMensagem(mensagem.id);
                 }}
