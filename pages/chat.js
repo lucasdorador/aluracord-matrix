@@ -3,11 +3,25 @@ import React from "react";
 import appConfig from "../config.json";
 import supabaseClient from "../services/supabase";
 import MoreDetails from "../components/moreDetails/indexMoreDetails";
+import { useRouter } from "next/router";
+import { ButtonSendSticker } from "../components/ButtonSendStickers/indexButtonSendStickers";
+
+const tableName = "mensagens";
+
+function escutaMensagensEmTempoReal(adicionaMensagem) {
+  return supabaseClient
+    .from(tableName)
+    .on("INSERT", (response) => {
+      adicionaMensagem(response.new);
+    })
+    .subscribe();
+}
 
 export default function ChatPage() {
-  const tableName = "mensagens";
   const [mensagem, setMensagem] = React.useState("");
   const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
+  const roteamento = useRouter();
+  const userName = roteamento.query.username;
 
   React.useEffect(() => {
     supabaseClient
@@ -17,21 +31,22 @@ export default function ChatPage() {
       .then(({ data }) => {
         setListaDeMensagens(data);
       });
+
+    escutaMensagensEmTempoReal((novaMensagem) => {
+      setListaDeMensagens((valorAtualDaLista) => {
+        return [novaMensagem, ...valorAtualDaLista];
+      });
+    });
   }, []);
 
   function handleNovaMensagem(novaMensagem) {
     if (novaMensagem.trim() !== "") {
       const mensagem = {
-        de: "lucasdorador",
+        de: userName,
         texto: novaMensagem,
       };
 
-      supabaseClient
-        .from(tableName)
-        .insert(mensagem)
-        .then(({ data }) => {
-          setListaDeMensagens([data[0], ...listaDeMensagens]);
-        });
+      supabaseClient.from(tableName).insert(mensagem).then();
 
       setMensagem("");
     }
@@ -135,9 +150,15 @@ export default function ChatPage() {
               size="lg"
               styleSheet={{
                 padding: "6px 8px",
+                marginRight: "8px",
               }}
               onClick={() => {
                 handleNovaMensagem(mensagem);
+              }}
+            />
+            <ButtonSendSticker
+              onStickerClick={(sticker) => {
+                handleNovaMensagem(`:sticker:${sticker}`);
               }}
             />
           </Box>
@@ -173,10 +194,12 @@ function Header() {
 
 function MessageList(props) {
   const [moreDetails, setMoreDetails] = React.useState({
+    userName: "",
     state: false,
     alignX: "0",
     alignY: "0",
   });
+
   return (
     <Box
       tag="ul"
@@ -225,17 +248,17 @@ function MessageList(props) {
                   src={`https://github.com/${mensagem.de}.png`}
                   onMouseOver={(event) => {
                     setMoreDetails({
+                      userName: mensagem.de,
                       state: true,
                       alignX: event.target.offsetLeft + 22,
                       alignY: event.target.offsetTop,
                     });
                   }}
                 />
+
                 {moreDetails.state ? (
                   <MoreDetails
-                    userName={mensagem.de}
-                    top={moreDetails.alignY}
-                    left={moreDetails.alignX}
+                    moreDetails={moreDetails}
                     cbCloseMoreDetail={setMoreDetails}
                   />
                 ) : null}
@@ -267,7 +290,14 @@ function MessageList(props) {
                 X
               </button>
             </Box>
-            {mensagem.texto}
+            {mensagem.texto.startsWith(":sticker:") ? (
+              <Image
+                styleSheet={{ maxWidth: "130px" }}
+                src={mensagem.texto.replace(":sticker:", "")}
+              />
+            ) : (
+              mensagem.texto
+            )}
           </Text>
         );
       })}

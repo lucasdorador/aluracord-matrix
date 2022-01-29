@@ -3,6 +3,8 @@ import React from "react";
 import { Box, Button, Text, TextField, Image } from "@skynexui/components";
 import { useRouter } from "next/router";
 
+const minimoLetrasGitHub = 2;
+
 function Titulo(props) {
   const Tag = props.tag || "h1";
   return (
@@ -19,10 +21,29 @@ function Titulo(props) {
   );
 }
 
+function checkUserGitHub(user) {}
+
 export default function PaginaInicial() {
-  const minimoLetrasGitHub = 2;
-  const [username, setUserName] = React.useState("lucasdorador");
+  const [username, setUserName] = React.useState("");
   const roteamento = useRouter();
+
+  const onSubmitForm = async (user) => {
+    if (user && user.trim() && user.length > minimoLetrasGitHub) {
+      fetch(`https://api.github.com/users/${user}`)
+        .then((response) => {
+          return response.json();
+        })
+        .then((data) => {
+          if (data.message === "Not Found") {
+            alert(`Usuário ${user} não é válido no GitHub.com`);
+          } else {
+            roteamento.push(`/chat?username=${username}`);
+          }
+        });
+    } else {
+      alert(`Usuário deverá ter no mínimo ${minimoLetrasGitHub} caracteres.`);
+    }
+  };
 
   return (
     <>
@@ -62,7 +83,7 @@ export default function PaginaInicial() {
             as="form"
             onSubmit={(event) => {
               event.preventDefault();
-              roteamento.push("/chat");
+              onSubmitForm(username);
             }}
             styleSheet={{
               display: "flex",
@@ -91,6 +112,7 @@ export default function PaginaInicial() {
               onChange={(event) => {
                 setUserName(event.target.value);
               }}
+              placeholder="Insira seu usuário do GitHub"
               textFieldColors={{
                 neutral: {
                   textColor: appConfig.theme.colors.neutrals[200],

@@ -9,8 +9,8 @@ export default function MoreDetails(props) {
         flexDirection: "column",
         width: "250px",
         height: "100px",
-        top: `${props.top}px`,
-        left: `${props.left}px`,
+        top: `${props.moreDetails.alignY}px`,
+        left: `${props.moreDetails.alignX}px`,
         position: "absolute",
         borderRadius: "10px",
         backgroundColor: appConfig.theme.colors.primary["900"],
@@ -33,7 +33,7 @@ export default function MoreDetails(props) {
             marginLeft: "8px",
             marginTop: "5px",
           }}
-          src={`https://github.com/${props.userName}.png`}
+          src={`https://github.com/${props.moreDetails.userName}.png`}
         />
         <button
           style={{
@@ -47,6 +47,7 @@ export default function MoreDetails(props) {
           }}
           onClick={() => {
             props.cbCloseMoreDetail({
+              userName: "",
               state: false,
               alignX: "0",
               alignY: "0",
@@ -68,9 +69,17 @@ export default function MoreDetails(props) {
             color: "white",
           }}
           target={"_blank"}
-          href={`https://github.com/${props.userName}`}
+          href={`https://github.com/${props.moreDetails.userName}`}
+          onClick={() =>
+            props.cbCloseMoreDetail({
+              userName: "",
+              state: false,
+              alignX: "0",
+              alignY: "0",
+            })
+          }
         >
-          {props.userName} (Github)
+          {props.moreDetails.userName} (Github)
         </a>
       </Box>
     </Box>
