@@ -259,8 +259,6 @@ function MessageList(props) {
                   color: "white",
                   cursor: "pointer",
                   border: "none",
-                  textAlign: "center",
-                  verticalAlign: "midlle",
                 }}
                 onClick={() => {
                   props.deletarMensagem(mensagem.id);
