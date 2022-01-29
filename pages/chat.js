@@ -1,38 +1,50 @@
 import { Box, Text, TextField, Image, Button } from "@skynexui/components";
 import React from "react";
 import appConfig from "../config.json";
+import supabaseClient from "../services/supabase";
+import MoreDetails from "../components/moreDetails/indexMoreDetails";
 
 export default function ChatPage() {
-  // return <div>Página do Chat</div>;
+  const tableName = "mensagens";
   const [mensagem, setMensagem] = React.useState("");
   const [listaDeMensagens, setListaDeMensagens] = React.useState([]);
 
-  /*
-    // Usuário
-    - Usuário digita no campo textarea
-    - Aperta enter para enviar
-    - Tem que adicionar o texto na listagem
-    
-    // Dev
-    - [X] Campo criado
-    - [X] Vamos usar o onChange usa o useState (ter if pra caso seja enter pra limpar a variavel)
-    - [X] Lista de mensagens 
-    */
+  React.useEffect(() => {
+    supabaseClient
+      .from(tableName)
+      .select("*")
+      .order("id", { ascending: false })
+      .then(({ data }) => {
+        setListaDeMensagens(data);
+      });
+  }, []);
+
   function handleNovaMensagem(novaMensagem) {
-    if (novaMensagem !== "") {
+    if (novaMensagem.trim() !== "") {
       const mensagem = {
-        id: listaDeMensagens.length + 1,
         de: "lucasdorador",
         texto: novaMensagem,
       };
 
-      setListaDeMensagens([mensagem, ...listaDeMensagens]);
+      supabaseClient
+        .from(tableName)
+        .insert(mensagem)
+        .then(({ data }) => {
+          setListaDeMensagens([data[0], ...listaDeMensagens]);
+        });
+
       setMensagem("");
     }
   }
 
   function handleApagarMensagem(idMensagem) {
-    setListaDeMensagens((prev) => prev.filter((el) => el.id !== idMensagem));
+    supabaseClient
+      .from(tableName)
+      .delete()
+      .match({ id: idMensagem })
+      .then(({ data }) =>
+        setListaDeMensagens((prev) => prev.filter((el) => el.id !== data[0].id))
+      );
   }
 
   return (
@@ -160,6 +172,11 @@ function Header() {
 }
 
 function MessageList(props) {
+  const [moreDetails, setMoreDetails] = React.useState({
+    state: false,
+    alignX: "0",
+    alignY: "0",
+  });
   return (
     <Box
       tag="ul"
@@ -196,15 +213,32 @@ function MessageList(props) {
             >
               <Box>
                 <Image
+                  id="imageAccount"
                   styleSheet={{
                     width: "20px",
                     height: "20px",
                     borderRadius: "50%",
                     display: "inline-block",
+                    position: "relative",
                     marginRight: "8px",
                   }}
                   src={`https://github.com/${mensagem.de}.png`}
+                  onMouseOver={(event) => {
+                    setMoreDetails({
+                      state: true,
+                      alignX: event.target.offsetLeft + 22,
+                      alignY: event.target.offsetTop,
+                    });
+                  }}
                 />
+                {moreDetails.state ? (
+                  <MoreDetails
+                    userName={mensagem.de}
+                    top={moreDetails.alignY}
+                    left={moreDetails.alignX}
+                    cbCloseMoreDetail={setMoreDetails}
+                  />
+                ) : null}
                 <Text tag="strong">{mensagem.de}</Text>
                 <Text
                   styleSheet={{
@@ -217,15 +251,23 @@ function MessageList(props) {
                   {new Date().toLocaleDateString()}
                 </Text>
               </Box>
-              <Button
-                size="xs"
-                variant="tertiary"
-                colorVariant="negative"
-                iconName="WindowClose"
+              <button
+                style={{
+                  width: "15px",
+                  height: "15px",
+                  background: "red",
+                  color: "white",
+                  cursor: "pointer",
+                  border: "none",
+                  textAlign: "center",
+                  verticalAlign: "midlle",
+                }}
                 onClick={() => {
                   props.deletarMensagem(mensagem.id);
                 }}
-              />
+              >
+                X
+              </button>
             </Box>
             {mensagem.texto}
           </Text>
